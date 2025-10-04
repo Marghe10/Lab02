@@ -1,26 +1,100 @@
-def carica_da_file(file_path):
+import csv
+
+def carica_da_file(percorso_file):
     """Carica i libri dal file"""
-    # TODO
+    biblioteca = []
+    try:
+        file=open(percorso_file,"r")
+        lettore = csv.reader(file)
+        prima_riga=True
+        for riga in lettore:
+            if prima_riga==True:
+                biblioteca = []
+                n=int(riga[0])
+                for _ in range(n):
+                    biblioteca.append([])
+                print(f"nella biblioteca ci sono: {riga[0]} sezioni")
+                prima_riga=False
+            else:
+                libro = {"titolo": riga[0], "autore": riga[1], "anno": riga[2], "numero_pagine": riga[3],
+                         "sezione": riga[4]}
+                i = int(libro["sezione"]) - 1
+                if 0<=i<n:
+                    biblioteca[i].append(libro)
+        file.close()
+        return biblioteca
+    except FileNotFoundError:
+        print("File not found")
+        return None
 
-
-def aggiungi_libro(biblioteca, titolo, autore, anno, pagine, sezione, file_path):
+def aggiungi_libro(biblioteca, titolo, autore, anno, pagine, sezione, percorso_file):
     """Aggiunge un libro nella biblioteca"""
-    # TODO
+        # Controllo se il libro esiste già
+    if biblioteca is None:
+        print("la biblioteca non esiste: ")
+        return None
+    for sezione in biblioteca:
+        for libro in sezione:
+            if libro["titolo"] == titolo:
+                print("il libro è già presente nella biblioteca!")
+                return None
+
+        # Controllo se la sezione è valida
+    if sezione < 1 or sezione > len(biblioteca):
+        print("Errore: sezione non esistente.")
+        return None
+
+        # Creo il nuovo libro
+    nuovo_libro = {"titolo": titolo, "autore": autore, "anno": anno, "numero_pagine": pagine, "sezione": sezione}
+
+        # Aggiungo il libro alla struttura dati
+    biblioteca[sezione - 1].append(nuovo_libro)
+
+        # Aggiungo il libro anche al file
+    file = open(percorso_file, "a", newline="")
+    scrittore = csv.writer(file)
+    scrittore.writerow([titolo, autore, anno, pagine, sezione])
+    file.close()
+
+    return nuovo_libro
 
 
 def cerca_libro(biblioteca, titolo):
     """Cerca un libro nella biblioteca dato il titolo"""
     # TODO
+    for sezione in biblioteca:  # scorro tutte le sezioni
+        for libro in sezione:  # scorro i libri dentro ogni sezione
+            if libro["titolo"] == titolo:  # controllo se il titolo corrisponde
+                return libro  # se trovato, restituisco il dizionario
+
+    return None  # se non trovo niente, ritorno None
 
 
 def elenco_libri_sezione_per_titolo(biblioteca, sezione):
     """Ordina i titoli di una data sezione della biblioteca in ordine alfabetico"""
     # TODO
+    # Controllo se la sezione esiste
+    if sezione < 1 or sezione > len(biblioteca):
+        return None
+
+    # Prendo la lista dei libri della sezione
+    libri_sezione = biblioteca[sezione - 1]
+
+    # Creo una lista vuota per i titoli
+    titoli = []
+
+    # Aggiungo ogni titolo alla lista
+    for libro in libri_sezione:
+        titoli.append(libro["titolo"])
+
+    # Ordino alfabeticamente
+    titoli.sort()
+
+    return titoli
 
 
 def main():
     biblioteca = []
-    file_path = "biblioteca.csv"
 
     while True:
         print("\n--- MENU BIBLIOTECA ---")
@@ -34,10 +108,17 @@ def main():
 
         if scelta == "1":
             while True:
-                file_path = input("Inserisci il path del file da caricare: ").strip()
-                biblioteca = carica_da_file(file_path)
+                percorso_file = input("Inserisci il percorso del file da caricare: ").strip()
+                biblioteca = carica_da_file(percorso_file)
                 if biblioteca is not None:
+                    print("nella biblioteca ci sono questi libri: ")
+                    for sezione in biblioteca:
+                        print("nuova sezione:")
+                        for libro in sezione:
+                            print(libro)
                     break
+                else:
+                    print("non esiste il file inserito")
 
         elif scelta == "2":
             if not biblioteca:
@@ -54,8 +135,8 @@ def main():
                 print("Errore: inserire valori numerici validi per anno, pagine e sezione.")
                 continue
 
-            libro = aggiungi_libro(biblioteca, titolo, autore, anno, pagine, sezione, file_path)
-            if libro:
+            nuovo_libro = aggiungi_libro(biblioteca, titolo, autore, anno, pagine, sezione, percorso_file)
+            if nuovo_libro:
                 print(f"Libro aggiunto con successo!")
             else:
                 print("Non è stato possibile aggiungere il libro.")
@@ -95,6 +176,5 @@ def main():
             print("Opzione non valida. Riprova.")
 
 
-if __name__ == "__main__":
-    main()
+main()
 
