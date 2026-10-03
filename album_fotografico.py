@@ -1,6 +1,43 @@
+from csv import DictReader,reader
+
+
 def carica_da_file(file_path):
     """Carica le foto dal file, creando un nuovo anno ogni volta che compare per la prima volta"""
     # TODO
+    try:
+        file=open(file_path,"r")
+        lettore=DictReader(file)
+        lista_foto=list(lettore)
+        file.close()
+        album_anno={}
+        """
+        {
+            "2019": [
+            {"anno": "2019", ...},
+            {...},
+            {...},
+            ],
+            "2021": [
+            {...},
+            {...},
+            {...},
+            ],
+        }
+        """
+        for i in lista_foto:
+            anno=i["anno"]
+            if anno not in album_anno: # se "2019" non è ancora una chiave del dizionario "album_anno"
+                album_anno[anno] = [] # -> {"2019":[]}
+            album_anno[anno].append(i) # -> {"2019": [ {...} ] }
+
+
+
+
+
+
+
+    except FileNotFoundError:
+        return None
 
 
 def aggiungi_foto(album, codice, titolo, autore, mese, anno, file_path):
