@@ -1,4 +1,4 @@
-from csv import DictReader,reader
+from csv import DictReader
 
 
 def carica_da_file(file_path):
@@ -7,34 +7,17 @@ def carica_da_file(file_path):
     try:
         file=open(file_path,"r")
         lettore=DictReader(file)
+        lettore.fieldnames = [name.strip() for name in lettore.fieldnames]
         lista_foto=list(lettore)
         file.close()
         album_anno={}
-        """
-        {
-            "2019": [
-            {"anno": "2019", ...},
-            {...},
-            {...},
-            ],
-            "2021": [
-            {...},
-            {...},
-            {...},
-            ],
-        }
-        """
         for i in lista_foto:
             anno=i["anno"]
             if anno not in album_anno: # se "2019" non è ancora una chiave del dizionario "album_anno"
-                album_anno[anno] = [] # -> {"2019":[]}
-            album_anno[anno].append(i) # -> {"2019": [ {...} ] }
-
-
-
-
-
-
+                album_anno[anno] = [] # -> creo una lista vuota per il nuovo anno {"2019":[]}
+            album_anno[anno].append(i) # ->Se l’anno non esiste ancora, viene creato come chiave del dizionario con una lista vuota come valore: {"2019": [ {...} ] }
+        print(album_anno)
+        return album_anno
 
     except FileNotFoundError:
         return None
@@ -43,17 +26,30 @@ def carica_da_file(file_path):
 def aggiungi_foto(album, codice, titolo, autore, mese, anno, file_path):
     """Aggiunge una foto all'album, creando l'anno al volo se non è ancora presente"""
     # TODO
-
+    nuova_foto={"anno":anno, "codice":codice,"titolo":titolo,"autore":autore,"mese":mese}
+    anno=str(anno)
+    if anno not in album:
+        album[anno]=[]
+    album[anno].append(nuova_foto)
+    return nuova_foto
 
 def cerca_foto(album, codice):
     """Cerca una foto nell'album dato il codice"""
     # TODO
+    for i in album:
+        for x in album[i]:
+            if x["codice"] == codice:
+                return x
+    return None
 
 
 def elenco_foto_anno_per_titolo(album, anno):
     """Ordina i titoli delle foto di un dato anno in ordine alfabetico"""
     # TODO
-
+    anno=str(anno)
+    if anno not in album:
+        return None
+    return sorted(album[anno], key=lambda x: x["titolo"])
 
 def main():
     album = []
